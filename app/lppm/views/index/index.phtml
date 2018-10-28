@@ -1,0 +1,12 @@
+<div class="page-header">
+    <h1>Congratulations!</h1>
+</div>
+
+<p>Ini Tampilan LPPM</p>
+
+<p>This page is located at <code>views/index/index.phtml</code></p>
+<a href="<?= $this->url->get('office') ?>" class="btn btn-info btn-block">LOGIN OFFICE AUTOMATION</a>
+<a href="<?= $this->url->get('monitoring') ?>" class="btn btn-info btn-block">LOGIN MONITORING KEUANGAN</a>
+
+<a href="<?= $this->url->get('daftar') ?>" class="btn btn-info btn-block">Belum Punya Akun Daftar</a>
+<p><?php $this->flashSession->output() ?></p>

@@ -1,0 +1,9 @@
+{
+    "require": {
+        "phalcon/devtools": "~3.2",
+        "swiftmailer/swiftmailer": "^6.0",
+        "mpdf/mpdf": "^7.1",
+        "phpoffice/phpspreadsheet": "^1.2",
+        "phpoffice/phpword": "^0.15.0"
+    }
+}

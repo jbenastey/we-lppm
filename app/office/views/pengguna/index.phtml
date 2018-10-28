@@ -1,0 +1,78 @@
+<?php
+
+?>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card-box table-responsive">
+
+            <h4 class="header-title m-t-0 m-b-30">Data Pengguna</h4>
+            <h4><?php $this->flashSession->output() ?></h4>
+
+            <div class="panel-heading">
+            <a href="<?= $this->url->get('office/pengguna/tambah') ?>" class="btn btn-info">
+                <i class="fa fa-plus"></i> Tambah Data
+            </a> <br><br>
+            </div>
+            <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap"
+                   cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nip / Nik</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Hak Akses</th>
+                    <th>Status Konfirmasi</th>
+                    <th>Aksi</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                $no = 1;
+                foreach ($pengguna as $data): ?>
+                    <tr>
+                        <td><?= $no ?></td>
+                        <td><?= $data->nip ?></td>
+                        <td><?= $data->nama ?></td>
+                        <td><?= $data->email ?></td>
+                        <td><?= $data->hak_akses ?></td>
+                        <td><?= $data->konfirmasi_email  ?></td>
+                        <td><a href="<?= $this->url->get('office/pengguna/edit/' . $data->nip) ?>"
+                               class="btn btn-info" ><i
+                                    class="fa fa-edit"></i></a>
+                            <a href=""
+                               class="btn btn-danger" data-toggle="modal" data-target="#modalHapus"><i
+                                        class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <?php
+                    $no++;
+                endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade " tabindex="-1" role="dialog" id="modalHapus"
+     aria-labelledby="mySmallModalLabel"
+     aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="text-center">Apakah Anda Yakin Menghapus Data?</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <a href="<?= $this->url->get('office/pengguna/hapus/' . $data->nip) ?>" class="btn btn-info btn-block">Ya,Hapus</a>
+                    </div>
+                    <div class="col-lg-6">
+                        <a data-dismiss="modal" class="btn btn-inverse btn-trans btn-block waves-effect w-md waves-inverse m-b-10">Tidak</a>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

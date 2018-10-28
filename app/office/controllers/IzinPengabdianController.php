@@ -1,0 +1,227 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: SarliZona
+ * Date: 10/15/2018
+ * Time: 16:57
+ */
+
+namespace LPPMKP\Office\Controllers;
+
+use LPPMKP\Lppm\Models\Pengguna;
+use LPPMKP\Office\Models\Pengajuansurat;
+
+require_once BASE_PATH . '/vendor/autoload.php';
+
+class IzinPengabdianController extends ControllerBase
+{
+
+    public function indexAction()
+    {
+        $this->view->halaman = 'List Surat Izin Pengabdian';
+        $tahunini = getdate();
+        $nip = $this->session->get('nip');
+        if ($this->session->get('hak_akses') == 'dosen') {
+            $pengajuan = Pengajuansurat::find([
+                'conditions' => "nip_pengaju like'$nip'"
+            ]);
+        } elseif ($this->session->get('hak_akses') == 'kepala') {
+            $pengajuan = Pengajuansurat::find();
+        }
+
+        foreach ($pengajuan as $pengajuans) {
+            $suratPengabdian[] = json_decode($pengajuans->isi_surat);
+        }
+        foreach ($suratPengabdian as $suratpengabdians) {
+            $isisurat[] = $suratpengabdians->izinpengabdian;
+        }
+
+        $this->view->data = $isisurat;
+        $this->view->pengajuan = $pengajuan;
+
+
+    }
+
+    public function formAction()
+    {
+        $this->view->halaman = 'Form Surat Izin Pengabdian';
+
+        if ($this->request->isPost()) {
+            $isi = null;
+            $tahunini = getdate();
+            $nip = $this->session->get('nip');
+            $cek = Pengajuansurat::find([
+                'conditions' => "nip_pengaju like'$nip' and tahun like '$tahunini[year]'"
+            ]);
+
+
+            $tanggal = date('d/m/y');
+
+
+            if (count($cek) == null) {
+                $isi = [
+                    "izinpengabdian" => [[
+                        "SipId" => 1,
+                        "SipKetNam" => $this->request->getPost('SipKetNam'),
+                        "SipAngNam" => $this->request->getPost('SipAngNam'),
+                        "SipJud" => $this->request->getPost('SipJud'),
+                        "SipTglKeg" => $this->request->getPost('SipTglKeg'),
+                        "SipLok" => $this->request->getPost('SipLok'),
+                        "SipInsTuj" => $this->request->getPost('SipInsTuj'),
+                        "SipKabKot" => $this->request->getPost('SipKabKot'),
+                        "SipTglSratKel" => $tanggal,
+                        "SipTglAcc" => "",
+                    ]],
+                    "izinpenelitian" => [],
+                    "FGD" => [],
+                    "surattugas" => [],
+                ];
+
+                $pengajuan = new Pengajuansurat();
+                $pengajuan->nip_pengaju = $this->session->get('user')->nip;
+                $pengajuan->tahun = date('y');
+                $pengajuan->isi_surat = json_encode($isi);
+                $pengajuan->save();
+                if ($pengajuan->save() == true) {
+                    $this->flashSession->success('Berhasil Menyimpan Data');
+
+                    $this->response->redirect('office/form-izinpengabdian');
+                } else {
+
+                    $this->flashSession->error('Gagal Menyimpan Data');
+
+                    $this->response->redirect('office/form-izinpengabdian');
+
+                }
+
+
+            } else {
+
+                $cek1 = Pengajuansurat::find([
+                    'conditions' => 'nip_pengaju like ' . $this->session->get('user')->nip,
+                    'conditions' => 'tahun like ' . $tahunini['year'],
+
+                ]);
+
+                $id_pengajuan = $cek1[0]->id_pengaju;
+
+                //id baru
+                $isilama = json_decode($cek1[0]->isi_surat);
+
+                $idakhir = end($isilama->izinpengabdian);
+
+                $idlama = $idakhir->SipId;
+                $idbaru = $idlama + 1;
+                $isi = [
+                    "SipId" => $idbaru,
+                    "SipKetNam" => $this->request->getPost('SipKetNam'),
+                    "SipAngNam" => $this->request->getPost('SipAngNam'),
+                    "SipJud" => $this->request->getPost('SipJud'),
+                    "SipTglKeg" => $this->request->getPost('SipTglKeg'),
+                    "SipLok" => $this->request->getPost('SipLok'),
+                    "SipInsTuj" => $this->request->getPost('SipInsTuj'),
+                    "SipKabKot" => $this->request->getPost('SipKabKot'),
+                    "SipTglSratKel" => $tanggal,
+                    "SipTglAcc" => "",
+
+                ];
+
+                //id baru
+
+                array_push($isilama->izinpengabdian, $isi);
+
+
+                $simpan = Pengajuansurat::findFirst($id_pengajuan);
+                $simpan->isi_surat = json_encode($isilama);
+                $simpan->save();
+                if ($simpan) {
+                    $this->flashSession->success('Berhasil Menyimpan Data');
+
+                    $this->response->redirect('office/form-izinpengabdian');
+                } else {
+
+                    $this->flashSession->error('Gagal Menyimpan Data');
+
+                    $this->response->redirect('office/form-izinpengabdian');
+
+                }
+
+            }
+
+        }
+
+    }
+
+    public function disposisiAction($id,$key2)
+    {
+        $pengajuan = Pengajuansurat::find($id);
+        $tanggal = date('d/m/y');
+
+        $isi = json_decode($pengajuan[0]->isi_surat);
+
+        $suratPengabdian[]= $isi->izinpengabdian;
+
+        $suratPengabdian[0][$key2]->SipTglAcc=$tanggal;
+
+        $pengajuan = Pengajuansurat::findFirst($id);
+
+        $pengajuan->isi_surat = json_encode($isi);
+
+        $pengajuan->save();
+        $this->flashSession->success('Berhasil Disposisi Data');
+        $this->response->redirect('office/list-izinpengabdian');
+
+    }
+
+    public function printAction($nip,$key2)
+    {
+        $pengajuan = Pengajuansurat::find([
+            'conditions' => "id_pengaju like'$nip'"
+        ]);
+        $kepala = Pengguna::find([
+            'conditions' => "hak_akses like 'kepala'"
+        ]);
+        $suratPenelitian = $pengajuan[0]->isi_surat;
+        $isisurat = json_decode($suratPenelitian);
+        $isisurat = $isisurat->izinpengabdian;
+        $isisurat = $isisurat[$key2];
+
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+
+        $document = $phpWord->loadTemplate('surat/SuratIzinPengabdian.docx');
+        $document->setValue('SipTglAcc', $isisurat->SipTglAcc);
+        $document->setValue('SipInsTuj', $isisurat->SipInsTuj);
+        $document->setValue('SipKabKot', $isisurat->SipKabKot);
+        $document->setValue('SipKetNam', $isisurat->SipKetNam);
+        $document->setValue('SipTglKeg', $isisurat->SipTglKeg);
+        foreach ($isisurat->SipAngNam as $anggota):
+            $document->setValue('SipAngNam', $anggota);
+        endforeach;
+
+        $document->setValue('SipJud', $isisurat->SipJud);
+        $document->setValue('SipLok', $isisurat->SipLok);
+
+        $document->setValue('ketua', $kepala[0]->nama);
+
+        $document->setValue('ketuanip', $kepala[0]->nip);
+        $tgl = str_replace('/', '-', $isisurat->SipTglAcc);
+
+        $filename = "surat izin Pengabdian " . $isisurat->SipKetNam . " " . $tgl . ".docx";
+        $name = "$filename";
+        $document->saveAs($name);
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . $filename);
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filename));
+        flush();
+        readfile($filename);
+        unlink($filename); // deletes the temporary file
+        exit;
+        die;
+
+    }
+}

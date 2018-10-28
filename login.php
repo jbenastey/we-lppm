@@ -12,7 +12,7 @@
         <div class="wrapper-page">
             <div class="text-center">
                 <a href="index.html" class="logo"><span>Lembaga Penelitian<span>Pengabdian Masyarakat</span></span></a>
-                <h5 class="text-muted m-t-0 font-600">LPPM Office - Uin Suska Riau</h5>
+                <h5 class="text-muted m-t-0 font-600">LPPM Office - Uin Suska Riauu</h5>
             </div>
         	<div class="m-t-40 card-box">
                 <div class="text-center">
